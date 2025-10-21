@@ -23,4 +23,14 @@ type ShopRegisterDTOResponse struct {
 	Address   string  `json:"address"`
 	Latitude  float64 `json:"latitude"`
 	Longitude float64 `json:"longitude"`
+	Token     string  `json:"token"`
+}
+
+type ShopLoginDTORequest struct {
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required"`
+}
+
+type ShopLoginDTOResponse struct {
+	Token string `json:"token"`
 }

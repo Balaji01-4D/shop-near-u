@@ -11,7 +11,7 @@ type Shop struct {
 	Mobile           string `gorm:"type:varchar(15);not null" json:"mobile"`
 	Type             string `gorm:"type:varchar(50);not null" json:"type"`
 	SupportsDelivery bool   `gorm:"type:boolean;default:false" json:"supports_delivery"`
-	Password		 string `gorm:"type:varchar(255);not null" json:"-"`
+	Password         string `gorm:"type:varchar(255);not null" json:"-"`
 
 	Address   string  `gorm:"type:varchar(255);not null" json:"address"`
 	Latitude  float64 `gorm:"type:decimal(10,8);" json:"latitude"`

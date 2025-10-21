@@ -37,3 +37,20 @@ func (s *Service) RegisterShop(registerDTO *ShopRegisterDTORequest) (*models.Sho
 
 	return shop, nil
 }
+
+func (s *Service) AuthenticateShop(request *ShopLoginDTORequest) (*models.Shop, error) {
+	shop, err := s.repository.FindByEmail(request.Email)
+	if err != nil {
+		return nil, err
+	}
+
+	if shop == nil {
+		return nil, nil
+	}
+
+	if err := utils.CheckPasswordHash(request.Password, shop.Password); err != nil {
+		return nil, nil
+	}
+
+	return shop, nil
+}

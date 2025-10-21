@@ -2,6 +2,7 @@ package server
 
 import (
 	"net/http"
+	productcatlog "shop-near-u/internal/productCatlog"
 	"shop-near-u/internal/shop"
 	"shop-near-u/internal/user"
 
@@ -25,6 +26,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	user.RegisterRoutes(r, s.db.GetDB())
 	shop.RegisterRoutes(r, s.db.GetDB())
+	productcatlog.RegisterRoutes(r, s.db.GetDB())
 
 	return r
 }

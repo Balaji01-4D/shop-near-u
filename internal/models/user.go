@@ -9,5 +9,6 @@ type User struct {
 	Password  string    `gorm:"type:varchar(255);not null" json:"-"`
 	Latitude  float64   `gorm:"type:decimal(10,8);" json:"latitude"`
 	Longitude float64   `gorm:"type:decimal(10,8);" json:"longitude"`
+	Role      string    `gorm:"type:varchar(50);not null;default:'user'" json:"role"`
 	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"`
 }

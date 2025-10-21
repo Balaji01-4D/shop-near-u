@@ -1,11 +1,11 @@
 package user
 
 import (
+	"net/http"
+	"os"
 	"shop-near-u/internal/middlewares"
 	"shop-near-u/internal/models"
 	"shop-near-u/internal/utils"
-	"net/http"
-	"os"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -33,7 +33,7 @@ func (ctrl *Controller) Register(c *gin.Context) {
 		return
 	}
 
-	token, err := utils.GenerateAccessToken(user.ID)
+	token, err := utils.GenerateAccessToken(user.ID, models.RoleUser)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate token"})
 		return
@@ -69,7 +69,7 @@ func (ctrl *Controller) Login(c *gin.Context) {
 		return
 	}
 
-	token, err := utils.GenerateAccessToken(user.ID)
+	token, err := utils.GenerateAccessToken(user.ID, models.RoleUser)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate token"})
 		return
@@ -177,9 +177,9 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB) {
 	{
 		users.POST("/register", ctrl.Register)
 		users.POST("/login", ctrl.Login)
-		users.GET("/me", middlewares.RequireAuth(db), ctrl.Me)
-		users.POST("/logout", middlewares.RequireAuth(db), ctrl.Logout)
-		users.POST("/change-password", middlewares.RequireAuth(db), ctrl.ChangePassword)
-		users.DELETE("/delete-account", middlewares.RequireAuth(db), ctrl.DeleteAccount)
+		users.GET("/me", middlewares.RequireUserAuth(db), ctrl.Me)
+		users.POST("/logout", middlewares.RequireUserAuth(db), ctrl.Logout)
+		users.POST("/change-password", middlewares.RequireUserAuth(db), ctrl.ChangePassword)
+		users.DELETE("/delete-account", middlewares.RequireUserAuth(db), ctrl.DeleteAccount)
 	}
 }
