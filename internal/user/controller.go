@@ -2,7 +2,6 @@ package user
 
 import (
 	"net/http"
-	"os"
 	"shop-near-u/internal/middlewares"
 	"shop-near-u/internal/models"
 	"shop-near-u/internal/utils"
@@ -39,10 +38,7 @@ func (ctrl *Controller) Register(c *gin.Context) {
 		return
 	}
 
-	domain := os.Getenv("COOKIE_DOMAIN")
-
-	c.SetSameSite(http.SameSiteLaxMode)
-	c.SetCookie("Authorization", token, 3600*24*30, "/", domain, false, true)
+	utils.SetCookie(token, 3600*24*30, c)
 
 	c.JSON(http.StatusCreated, gin.H{
 		"status": "user registered successfully",
@@ -75,10 +71,7 @@ func (ctrl *Controller) Login(c *gin.Context) {
 		return
 	}
 
-	domain := os.Getenv("COOKIE_DOMAIN")
-
-	c.SetSameSite(http.SameSiteLaxMode)
-	c.SetCookie("Authorization", token, 3600*24*30, "/", domain, false, true)
+	utils.SetCookie(token, 3600*24*30, c)
 
 	c.JSON(http.StatusCreated, gin.H{
 		"status": "user login successfully",
@@ -109,10 +102,8 @@ func (ctrl *Controller) Me(c *gin.Context) {
 }
 
 func (ctrl *Controller) Logout(c *gin.Context) {
-	domain := os.Getenv("COOKIE_DOMAIN")
 
-	c.SetSameSite(http.SameSiteLaxMode)
-	c.SetCookie("Authorization", "", -1, "/", domain, false, true)
+	utils.SetCookie("", -1, c)
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "successfully logged out",
@@ -158,16 +149,13 @@ func (ctrl *Controller) DeleteAccount(c *gin.Context) {
 		return
 	}
 
-	domain := os.Getenv("COOKIE_DOMAIN")
-
-	c.SetSameSite(http.SameSiteLaxMode)
-	c.SetCookie("Authorization", "", -1, "/", domain, false, true)
+	utils.SetCookie("", -1, c)
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "account deleted successfully",
 	})
 }
-
+	
 func RegisterRoutes(r *gin.Engine, db *gorm.DB) {
 	repo := NewRepository(db)
 	svc := NewService(repo)

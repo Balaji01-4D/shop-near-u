@@ -46,7 +46,6 @@ func TestService_RegisterShop(t *testing.T) {
 		Email:    "test@123.com",
 		Password: "password123",
 		Address:  "123 Test St",
-		Mobile:    "1234567890",
 		Latitude:   37.7749,
 		Longitude: -122.4194,
 		SupportsDelivery: true,

@@ -3,7 +3,6 @@ package shop
 import (
 	"errors"
 	"net/http"
-	"os"
 	"shop-near-u/internal/middlewares"
 	"shop-near-u/internal/models"
 	"shop-near-u/internal/product"
@@ -64,10 +63,7 @@ func (ctrl *Controller) RegisterShop(c *gin.Context) {
 		Token:     token,
 	}
 
-	domain := os.Getenv("COOKIE_DOMAIN")
-
-	c.SetSameSite(http.SameSiteLaxMode)
-	c.SetCookie("Authorization", token, 3600*24*30, "/", domain, false, true)
+	utils.SetCookie(token, 3600*24*30, c)
 
 	c.JSON(http.StatusCreated, res)
 }
@@ -109,10 +105,8 @@ func (ctrl *Controller) Login(c *gin.Context) {
 		Token:     token,
 	}
 
-	domain := os.Getenv("COOKIE_DOMAIN")
 
-	c.SetSameSite(http.SameSiteLaxMode)
-	c.SetCookie("Authorization", token, 3600*24*30, "/", domain, false, true)
+	utils.SetCookie(token, 3600*24*30, c)
 
 	c.JSON(http.StatusOK, res)
 
@@ -265,6 +259,46 @@ func (ctrl *Controller) DeleteProduct(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "product deleted successfully"})
 }
 
+func (ctrl *Controller) NearByShop(c *gin.Context) {
+	latStr := c.Query("lat")
+	lonStr := c.Query("lon")
+	radStr := c.DefaultQuery("radius", "5000") // default radius 5km
+	limit := c.DefaultQuery("limit", "10")
+
+	lat, err := utils.ParseFloatParam(latStr)
+	if err != nil {
+		c.JSON(400, gin.H{"error": "invalid latitude"})
+		return
+	}
+
+	lim, err:= utils.ParseIntParam(limit)
+	if err != nil {
+		c.JSON(400, gin.H{"error": "invalid limit"})
+		return
+	}
+	
+	lon, err := utils.ParseFloatParam(lonStr)
+	if err != nil {
+		c.JSON(400, gin.H{"error": "invalid longitude"})
+		return
+	}
+	
+	radius, err := utils.ParseFloatParam(radStr)
+	if err != nil {
+		c.JSON(400, gin.H{"error": "invalid radius"})
+		return
+	}
+
+	shops, err := ctrl.shopService.GetNearbyShops(lat, lon, radius, lim)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	
+
+	c.JSON(http.StatusOK, shops)
+}
+
 func RegisterRoutes(r *gin.Engine, db *gorm.DB) {
 	repo := NewRepository(db)
 	shopService := NewService(repo)
@@ -276,6 +310,7 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB) {
 		shops.POST("/register", ctrl.RegisterShop)
 		shops.POST("/login", ctrl.Login)
 		shops.GET("/profile", middlewares.RequireShopOwnerAuth(db), ctrl.GetShopProfile)
+		shops.GET("", ctrl.NearByShop)
 
 	}
 

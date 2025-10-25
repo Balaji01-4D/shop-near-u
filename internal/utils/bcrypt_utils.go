@@ -26,3 +26,20 @@ func ParseUintParam(param string) (uint, error) {
 	}
 	return uint(id), nil
 }
+
+func ParseFloatParam(param string) (float64, error) {
+	value, err := strconv.ParseFloat(param, 64)
+	if err != nil {
+		return 0, err
+	}
+	return value, nil
+}
+
+func ParseIntParam(param string) (int, error) {
+	value, err := strconv.Atoi(param)
+
+	if err != nil {
+		return 0, err
+	}
+	return value, nil
+}

@@ -28,6 +28,7 @@ func Migrate() {
 		panic("failed to connect database")
 	}
 
+	db.Exec("CREATE EXTENSION IF NOT EXISTS postgis;")
 	// Migrate the schema
 	err = db.AutoMigrate(&models.User{})
 	err = db.AutoMigrate(&models.Shop{})

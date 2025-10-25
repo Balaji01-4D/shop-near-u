@@ -3,11 +3,15 @@ package shop
 import (
 	"shop-near-u/internal/models"
 	"shop-near-u/internal/utils"
+
+	"github.com/restayway/gogis"
 )
 
 type Service struct {
 	repository *Repository
 }
+
+
 
 func NewService(r *Repository) *Service {
 	return &Service{repository: r}
@@ -29,6 +33,10 @@ func (s *Service) RegisterShop(registerDTO *ShopRegisterDTORequest) (*models.Sho
 		Address:   registerDTO.Address,
 		Latitude:  registerDTO.Latitude,
 		Longitude: registerDTO.Longitude,
+		Location: gogis.Point{
+			Lng: registerDTO.Longitude,
+			Lat: registerDTO.Latitude,
+		},
 	}
 
 	if err := s.repository.Create(shop); err != nil {
@@ -53,4 +61,13 @@ func (s *Service) AuthenticateShop(request *ShopLoginDTORequest) (*models.Shop, 
 	}
 
 	return shop, nil
+}
+
+func (s *Service) GetNearbyShops(lat float64, lon float64, radius float64, limit int) ([]NearByShopsDTORespone, error) {
+	shops, err := s.repository.FindNearbyShops(lat, lon, radius, limit)
+	if err != nil {
+		return nil, err
+	}
+
+	return shops, nil
 }

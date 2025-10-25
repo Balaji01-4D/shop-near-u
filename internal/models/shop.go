@@ -1,6 +1,10 @@
 package models
 
-import "time"
+import (
+	"time"
+	"github.com/restayway/gogis"
+)
+
 
 type Shop struct {
 	ID uint `gorm:"primaryKey;autoIncrement" json:"id"`
@@ -16,6 +20,8 @@ type Shop struct {
 	Address   string  `gorm:"type:varchar(255);not null" json:"address"`
 	Latitude  float64 `gorm:"type:decimal(10,8);" json:"latitude"`
 	Longitude float64 `gorm:"type:decimal(10,8);" json:"longitude"`
+	Location  gogis.Point `gorm:"type:geometry(POINT,4326);" json:"location"`
+
 
 	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"`
 

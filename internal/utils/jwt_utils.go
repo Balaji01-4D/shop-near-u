@@ -2,10 +2,12 @@ package utils
 
 import (
 	"encoding/json"
+	"net/http"
 	"os"
 	"strconv"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -102,4 +104,12 @@ func ParseToken(tokenString string) (int64, string, error) {
 	}
 
 	return int64(0), "", jwt.ErrTokenInvalidClaims
+}
+
+
+func SetCookie(token string, time int, c *gin.Context) {
+	domain := os.Getenv("COOKIE_DOMAIN")
+
+	c.SetSameSite(http.SameSiteLaxMode)
+	c.SetCookie("Authorization", token, 3600*24*30, "/", domain, false, true)
 }
