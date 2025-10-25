@@ -35,11 +35,10 @@ type ShopLoginDTOResponse struct {
 	Token string `json:"token"`
 }
 
-
 type NearByShopsDTORespone struct {
-	ID		uint    `json:"id" binding:"required"`
-	Name    string  `json:"name" binding:"required"`
-	Address string  `json:"address" binding:"required"`
+	ID        uint    `json:"id" binding:"required"`
+	Name      string  `json:"name" binding:"required"`
+	Address   string  `json:"address" binding:"required"`
 	Latitude  float64 `json:"latitude" binding:"required"`
 	Longitude float64 `json:"longitude" binding:"required"`
 	Distance  float64 `json:"distance" binding:"required"`
