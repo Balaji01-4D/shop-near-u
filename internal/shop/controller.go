@@ -309,8 +309,8 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB) {
 	products := r.Group("/shop/products")
 	products.Use(middlewares.RequireShopOwnerAuth(db))
 	{
-		products.POST("/", ctrl.AddProduct)
-		products.GET("/", ctrl.GetAllProducts)
+		products.POST("", ctrl.AddProduct)
+		products.GET("", ctrl.GetAllProducts)
 		products.GET("/:id", ctrl.GetProductByID)
 		products.PUT("/", ctrl.UpdateProduct)
 		products.DELETE("/:id", ctrl.DeleteProduct)
