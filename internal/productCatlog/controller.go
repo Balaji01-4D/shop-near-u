@@ -2,6 +2,7 @@ package productcatlog
 
 import (
 	"net/http"
+	"shop-near-u/internal/utils"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -20,19 +21,18 @@ func (ctrl *Controller) CreateCatalogProduct(c *gin.Context) {
 	var dto CreateCatalogProductDTO
 
 	if err := c.ShouldBindJSON(&dto); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.ErrorResponseSimple(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	err := ctrl.service.CreateCatalogProduct(&dto)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		utils.ErrorResponseSimple(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"message": "created Successfully",
-		"name":    dto.Name,
+	utils.SuccessResponse(c, http.StatusCreated, "Catalog product created successfully", gin.H{
+		"name": dto.Name,
 	})
 
 }
@@ -42,16 +42,16 @@ func (ctrl *Controller) SuggestCatalogProducts(c *gin.Context) {
 	keyword := c.Query("keyword")
 	limit, err := strconv.Atoi(c.Query("limit"))
 	if err != nil {
-		limit = 10 // default limit
+		limit = 10
 	}
 
 	products, err := ctrl.service.SuggestCatalogProducts(keyword, limit)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		utils.ErrorResponseSimple(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
+	utils.SuccessResponse(c, http.StatusOK, "Catalog products retrieved successfully", gin.H{
 		"products": products,
 	})
 }

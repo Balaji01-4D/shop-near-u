@@ -5,6 +5,7 @@ import (
 	productcatlog "shop-near-u/internal/productCatlog"
 	"shop-near-u/internal/shop"
 	"shop-near-u/internal/user"
+	"shop-near-u/internal/utils"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -32,12 +33,9 @@ func (s *Server) RegisterRoutes() http.Handler {
 }
 
 func (s *Server) HelloWorldHandler(c *gin.Context) {
-	resp := make(map[string]string)
-	resp["message"] = "Hello World"
-
-	c.JSON(http.StatusOK, resp)
+	utils.SuccessResponse(c, http.StatusOK, "Hello World", nil)
 }
 
 func (s *Server) healthHandler(c *gin.Context) {
-	c.JSON(http.StatusOK, s.db.Health())
+	utils.SuccessResponse(c, http.StatusOK, "Service is healthy", s.db.Health())
 }

@@ -22,26 +22,25 @@ func (ctrl *Controller) Register(c *gin.Context) {
 
 	var userDTO UserRegisterDTO
 	if err := c.ShouldBindJSON(&userDTO); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.ErrorResponseSimple(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	user, err := ctrl.service.RegisterUser(&userDTO)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		utils.ErrorResponseSimple(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	token, err := utils.GenerateAccessToken(user.ID, models.RoleUser)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate token"})
+		utils.ErrorResponseSimple(c, http.StatusInternalServerError, "failed to generate token")
 		return
 	}
 
 	utils.SetCookie(token, 3600*24*30, c)
 
-	c.JSON(http.StatusCreated, gin.H{
-		"status": "user registered successfully",
+	utils.SuccessResponse(c, http.StatusCreated, "User registered successfully", gin.H{
 		"user": gin.H{
 			"id":    user.ID,
 			"email": user.Email,
@@ -55,26 +54,25 @@ func (ctrl *Controller) Login(c *gin.Context) {
 
 	var loginDTO UserLoginDTO
 	if err := c.ShouldBindJSON(&loginDTO); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.ErrorResponseSimple(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	user, err := ctrl.service.AuthenticateUser(loginDTO.Email, loginDTO.Password)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
+		utils.ErrorResponseSimple(c, http.StatusUnauthorized, "invalid credentials")
 		return
 	}
 
 	token, err := utils.GenerateAccessToken(user.ID, models.RoleUser)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate token"})
+		utils.ErrorResponseSimple(c, http.StatusInternalServerError, "failed to generate token")
 		return
 	}
 
 	utils.SetCookie(token, 3600*24*30, c)
 
-	c.JSON(http.StatusCreated, gin.H{
-		"status": "user login successfully",
+	utils.SuccessResponse(c, http.StatusOK, "User logged in successfully", gin.H{
 		"user": gin.H{
 			"id":    user.ID,
 			"email": user.Email,
@@ -88,13 +86,14 @@ func (ctrl *Controller) Me(c *gin.Context) {
 
 	user, exists := c.Get("user")
 	if !exists {
-		c.AbortWithStatus(http.StatusUnauthorized)
+		utils.ErrorResponseSimple(c, http.StatusUnauthorized, "unauthorized")
+		c.Abort()
 		return
 	}
 
 	u := user.(models.User)
 
-	c.JSON(http.StatusOK, gin.H{
+	utils.SuccessResponse(c, http.StatusOK, "User profile retrieved successfully", gin.H{
 		"id":    u.ID,
 		"name":  u.Name,
 		"email": u.Email,
@@ -105,57 +104,53 @@ func (ctrl *Controller) Logout(c *gin.Context) {
 
 	utils.SetCookie("", -1, c)
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "successfully logged out",
-	})
+	utils.SuccessResponse(c, http.StatusOK, "Successfully logged out", nil)
 }
 
 func (ctrl *Controller) ChangePassword(c *gin.Context) {
 	var pwdDTO ChangePasswordDTO
 	if err := c.ShouldBindJSON(&pwdDTO); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.ErrorResponseSimple(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	user, exists := c.Get("user")
 	if !exists {
-		c.AbortWithStatus(http.StatusUnauthorized)
+		utils.ErrorResponseSimple(c, http.StatusUnauthorized, "unauthorized")
+		c.Abort()
 		return
 	}
 
 	u := user.(models.User)
 	err := ctrl.service.ChangePassword(u.ID, pwdDTO.OldPassword, pwdDTO.NewPassword)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.ErrorResponseSimple(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "password changed successfully",
-	})
+	utils.SuccessResponse(c, http.StatusOK, "Password changed successfully", nil)
 }
 
 func (ctrl *Controller) DeleteAccount(c *gin.Context) {
 	user, exists := c.Get("user")
 	if !exists {
-		c.AbortWithStatus(http.StatusUnauthorized)
+		utils.ErrorResponseSimple(c, http.StatusUnauthorized, "unauthorized")
+		c.Abort()
 		return
 	}
 
 	u := user.(models.User)
 	err := ctrl.service.DeleteUser(u.ID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		utils.ErrorResponseSimple(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	utils.SetCookie("", -1, c)
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "account deleted successfully",
-	})
+	utils.SuccessResponse(c, http.StatusOK, "Account deleted successfully", nil)
 }
-	
+
 func RegisterRoutes(r *gin.Engine, db *gorm.DB) {
 	repo := NewRepository(db)
 	svc := NewService(repo)

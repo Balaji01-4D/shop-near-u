@@ -14,24 +14,28 @@ var db *gorm.DB
 func requireUserAuth(c *gin.Context) {
 	tokenString, err := c.Cookie("Authorization")
 	if err != nil {
-		c.AbortWithStatus(http.StatusUnauthorized)
+		utils.ErrorResponseSimple(c, http.StatusUnauthorized, "unauthorized")
+		c.Abort()
 		return
 	}
 
 	userID, role, err := utils.ParseToken(tokenString)
 
 	if err != nil {
-		c.AbortWithStatus(http.StatusUnauthorized)
+		utils.ErrorResponseSimple(c, http.StatusUnauthorized, "invalid token")
+		c.Abort()
 		return
 	}
 
 	var user models.User
 	if err := db.Where("id = ?", userID).First(&user).Error; err != nil || user.ID == 0 {
-		c.AbortWithStatus(http.StatusUnauthorized)
+		utils.ErrorResponseSimple(c, http.StatusUnauthorized, "user not found")
+		c.Abort()
 		return
 	}
 	if role != models.RoleUser {
-		c.AbortWithStatus(http.StatusUnauthorized)
+		utils.ErrorResponseSimple(c, http.StatusUnauthorized, "insufficient permissions")
+		c.Abort()
 		return
 	}
 
@@ -44,24 +48,28 @@ func requireUserAuth(c *gin.Context) {
 func requireShopOwnerAuth(c *gin.Context) {
 	tokenString, err := c.Cookie("Authorization")
 	if err != nil {
-		c.AbortWithStatus(http.StatusUnauthorized)
+		utils.ErrorResponseSimple(c, http.StatusUnauthorized, "unauthorized")
+		c.Abort()
 		return
 	}
 
 	shopID, role, err := utils.ParseToken(tokenString)
 
 	if err != nil {
-		c.AbortWithStatus(http.StatusUnauthorized)
+		utils.ErrorResponseSimple(c, http.StatusUnauthorized, "invalid token")
+		c.Abort()
 		return
 	}
 
 	var shop models.Shop
 	if err := db.Where("id = ?", shopID).First(&shop).Error; err != nil || shop.ID == 0 {
-		c.AbortWithStatus(http.StatusUnauthorized)
+		utils.ErrorResponseSimple(c, http.StatusUnauthorized, "shop not found")
+		c.Abort()
 		return
 	}
 	if role != models.RoleShopOwner {
-		c.AbortWithStatus(http.StatusUnauthorized)
+		utils.ErrorResponseSimple(c, http.StatusUnauthorized, "insufficient permissions")
+		c.Abort()
 		return
 	}
 
@@ -74,25 +82,29 @@ func requireShopOwnerAuth(c *gin.Context) {
 func requireAdminAuth(c *gin.Context) {
 	tokenString, err := c.Cookie("Authorization")
 	if err != nil {
-		c.AbortWithStatus(http.StatusUnauthorized)
+		utils.ErrorResponseSimple(c, http.StatusUnauthorized, "unauthorized")
+		c.Abort()
 		return
 	}
 
 	userID, role, err := utils.ParseToken(tokenString)
 
 	if err != nil {
-		c.AbortWithStatus(http.StatusUnauthorized)
+		utils.ErrorResponseSimple(c, http.StatusUnauthorized, "invalid token")
+		c.Abort()
 		return
 	}
 
 	var user models.User
 	if err := db.Where("id = ?", userID).First(&user).Error; err != nil || user.ID == 0 {
-		c.AbortWithStatus(http.StatusUnauthorized)
+		utils.ErrorResponseSimple(c, http.StatusUnauthorized, "user not found")
+		c.Abort()
 		return
 	}
 
 	if role != models.RoleAdmin {
-		c.AbortWithStatus(http.StatusUnauthorized)
+		utils.ErrorResponseSimple(c, http.StatusUnauthorized, "insufficient permissions")
+		c.Abort()
 		return
 	}
 

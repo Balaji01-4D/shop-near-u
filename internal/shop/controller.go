@@ -24,33 +24,35 @@ func NewController(s *Service, p *product.Service) *Controller {
 func (ctrl *Controller) RegisterShop(c *gin.Context) {
 	var dto ShopRegisterDTORequest
 	if err := c.ShouldBindJSON(&dto); err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		utils.ErrorResponseSimple(c, 400, err.Error())
 		return
 	}
 
 	shop, err := ctrl.shopService.RegisterShop(&dto)
 	if err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
-			c.JSON(409, gin.H{"error": "shop already exists"})
+			utils.ErrorResponseSimple(c, 409, "shop already exists")
 			return
 		}
-		c.JSON(500, gin.H{"error": err.Error()})
+		utils.ErrorResponseSimple(c, 500, err.Error())
 		return
 	}
 
 	if shop == nil {
-		c.JSON(500, gin.H{"error": "failed to create shop"})
+		utils.ErrorResponseSimple(c, 500, "failed to create shop")
 		return
 	}
 
 	token, err := utils.GenerateAccessToken(shop.ID, models.RoleShopOwner)
 
 	if err != nil {
-		c.JSON(500, gin.H{"error": "failed to generate access token"})
+		utils.ErrorResponseSimple(c, 500, "failed to generate access token")
 		return
 	}
 
-	res := ShopRegisterDTOResponse{
+	utils.SetCookie(token, 3600*24*30, c)
+
+	utils.SuccessResponse(c, http.StatusCreated, "Shop registered successfully", ShopRegisterDTOResponse{
 		ID:        shop.ID,
 		Name:      shop.Name,
 		OwnerName: shop.OwnerName,
@@ -61,38 +63,36 @@ func (ctrl *Controller) RegisterShop(c *gin.Context) {
 		Latitude:  shop.Latitude,
 		Longitude: shop.Longitude,
 		Token:     token,
-	}
-
-	utils.SetCookie(token, 3600*24*30, c)
-
-	c.JSON(http.StatusCreated, res)
+	})
 }
 
 func (ctrl *Controller) Login(c *gin.Context) {
 	var dto ShopLoginDTORequest
 	if err := c.ShouldBindJSON(&dto); err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		utils.ErrorResponseSimple(c, 400, err.Error())
 		return
 	}
 
 	shop, err := ctrl.shopService.AuthenticateShop(&dto)
 	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
+		utils.ErrorResponseSimple(c, 500, err.Error())
 		return
 	}
 
 	if shop == nil {
-		c.JSON(401, gin.H{"error": "invalid credentials"})
+		utils.ErrorResponseSimple(c, 401, "invalid credentials")
 		return
 	}
 
 	token, err := utils.GenerateAccessToken(shop.ID, models.RoleShopOwner)
 	if err != nil {
-		c.JSON(500, gin.H{"error": "failed to generate access token"})
+		utils.ErrorResponseSimple(c, 500, "failed to generate access token")
 		return
 	}
 
-	res := ShopRegisterDTOResponse{
+	utils.SetCookie(token, 3600*24*30, c)
+
+	utils.SuccessResponse(c, http.StatusOK, "Shop logged in successfully", ShopRegisterDTOResponse{
 		ID:        shop.ID,
 		Name:      shop.Name,
 		OwnerName: shop.OwnerName,
@@ -103,29 +103,24 @@ func (ctrl *Controller) Login(c *gin.Context) {
 		Latitude:  shop.Latitude,
 		Longitude: shop.Longitude,
 		Token:     token,
-	}
-
-
-	utils.SetCookie(token, 3600*24*30, c)
-
-	c.JSON(http.StatusOK, res)
+	})
 
 }
 
 func (ctrl *Controller) GetShopProfile(c *gin.Context) {
 	shopInterface, exists := c.Get("shop")
 	if !exists {
-		c.JSON(401, gin.H{"error": "unauthorized"})
+		utils.ErrorResponseSimple(c, 401, "unauthorized")
 		return
 	}
 
 	shop, ok := shopInterface.(models.Shop)
 	if !ok {
-		c.JSON(500, gin.H{"error": "failed to parse shop data"})
+		utils.ErrorResponseSimple(c, 500, "failed to parse shop data")
 		return
 	}
 
-	res := ShopRegisterDTOResponse{
+	utils.SuccessResponse(c, http.StatusOK, "Shop profile retrieved successfully", ShopRegisterDTOResponse{
 		ID:        shop.ID,
 		Name:      shop.Name,
 		OwnerName: shop.OwnerName,
@@ -135,168 +130,165 @@ func (ctrl *Controller) GetShopProfile(c *gin.Context) {
 		Address:   shop.Address,
 		Latitude:  shop.Latitude,
 		Longitude: shop.Longitude,
-	}
-
-	c.JSON(http.StatusOK, res)
+	})
 }
 
 func (ctrl *Controller) AddProduct(c *gin.Context) {
 	var dto product.AddProductDTORequest
 	if err := c.ShouldBindJSON(&dto); err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		utils.ErrorResponseSimple(c, 400, err.Error())
 		return
 	}
 
 	shopInterface, exists := c.Get("shop")
 	if !exists {
-		c.JSON(401, gin.H{"error": "unauthorized"})
+		utils.ErrorResponseSimple(c, 401, "unauthorized")
 		return
 	}
 
 	shop, ok := shopInterface.(models.Shop)
 	if !ok {
-		c.JSON(500, gin.H{"error": "failed to parse shop data"})
+		utils.ErrorResponseSimple(c, 500, "failed to parse shop data")
 		return
 	}
 
 	err := ctrl.productService.AddProduct(&dto, shop.ID)
 	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
+		utils.ErrorResponseSimple(c, 500, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "product added successfully"})
+	utils.SuccessResponse(c, http.StatusCreated, "Product added successfully", nil)
 }
 
 func (ctrl *Controller) GetAllProducts(c *gin.Context) {
 	shopInterface, exists := c.Get("shop")
 	if !exists {
-		c.JSON(401, gin.H{"error": "unauthorized"})
+		utils.ErrorResponseSimple(c, 401, "unauthorized")
 		return
 	}
 
 	shop, ok := shopInterface.(models.Shop)
 	if !ok {
-		c.JSON(500, gin.H{"error": "failed to parse shop data"})
+		utils.ErrorResponseSimple(c, 500, "failed to parse shop data")
 		return
 	}
 
 	products, err := ctrl.productService.GetProductsByShopID(shop.ID)
 	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
+		utils.ErrorResponseSimple(c, 500, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, products)
+	utils.SuccessResponse(c, http.StatusOK, "Products retrieved successfully", products)
 }
 
 func (ctrl *Controller) GetProductByID(c *gin.Context) {
 	productIDParam := c.Param("id")
 	if productIDParam == "" {
-		c.JSON(400, gin.H{"error": "product ID is required"})
+		utils.ErrorResponseSimple(c, 400, "product ID is required")
 		return
 	}
 
 	productID, err := utils.ParseUintParam(productIDParam)
 	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid product ID"})
+		utils.ErrorResponseSimple(c, 400, "invalid product ID")
 		return
 	}
 
 	product, err := ctrl.productService.GetProductByID(productID)
 	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
+		utils.ErrorResponseSimple(c, 500, err.Error())
 		return
 	}
 
 	if product == nil {
-		c.JSON(404, gin.H{"error": "product not found"})
+		utils.ErrorResponseSimple(c, 404, "product not found")
 		return
 	}
 
-	c.JSON(http.StatusOK, product)
+	utils.SuccessResponse(c, http.StatusOK, "Product retrieved successfully", product)
 }
 
 func (ctrl *Controller) UpdateProduct(c *gin.Context) {
 	var dto product.ProductUpdateDTORequest
 	if err := c.ShouldBindJSON(&dto); err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		utils.ErrorResponseSimple(c, 400, err.Error())
 		return
 	}
 
 	err := ctrl.productService.UpdateProduct(&dto)
 	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
+		utils.ErrorResponseSimple(c, 500, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "product updated successfully"})
+	utils.SuccessResponse(c, http.StatusOK, "Product updated successfully", nil)
 }
 
 func (ctrl *Controller) DeleteProduct(c *gin.Context) {
 	productIDParam := c.Param("id")
 	if productIDParam == "" {
-		c.JSON(400, gin.H{"error": "product ID is required"})
+		utils.ErrorResponseSimple(c, 400, "product ID is required")
 		return
 	}
 
 	productID, err := utils.ParseUintParam(productIDParam)
 	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid product ID"})
+		utils.ErrorResponseSimple(c, 400, "invalid product ID")
 		return
 	}
 
 	err = ctrl.productService.DeleteProduct(productID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.JSON(404, gin.H{"error": "product not found"})
+			utils.ErrorResponseSimple(c, 404, "product not found")
 			return
 		}
-		c.JSON(500, gin.H{"error": err.Error()})
+		utils.ErrorResponseSimple(c, 500, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "product deleted successfully"})
+	utils.SuccessResponse(c, http.StatusOK, "Product deleted successfully", nil)
 }
 
 func (ctrl *Controller) NearByShop(c *gin.Context) {
 	latStr := c.Query("lat")
 	lonStr := c.Query("lon")
-	radStr := c.DefaultQuery("radius", "5000") // default radius 5km
+	radStr := c.DefaultQuery("radius", "5000")
 	limit := c.DefaultQuery("limit", "10")
 
 	lat, err := utils.ParseFloatParam(latStr)
 	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid latitude"})
+		utils.ErrorResponseSimple(c, 400, "invalid latitude")
 		return
 	}
 
-	lim, err:= utils.ParseIntParam(limit)
+	lim, err := utils.ParseIntParam(limit)
 	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid limit"})
+		utils.ErrorResponseSimple(c, 400, "invalid limit")
 		return
 	}
-	
+
 	lon, err := utils.ParseFloatParam(lonStr)
 	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid longitude"})
+		utils.ErrorResponseSimple(c, 400, "invalid longitude")
 		return
 	}
-	
+
 	radius, err := utils.ParseFloatParam(radStr)
 	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid radius"})
+		utils.ErrorResponseSimple(c, 400, "invalid radius")
 		return
 	}
 
 	shops, err := ctrl.shopService.GetNearbyShops(lat, lon, radius, lim)
 	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
+		utils.ErrorResponseSimple(c, 500, err.Error())
 		return
 	}
-	
 
-	c.JSON(http.StatusOK, shops)
+	utils.SuccessResponse(c, http.StatusOK, "Nearby shops retrieved successfully", shops)
 }
 
 func RegisterRoutes(r *gin.Engine, db *gorm.DB) {
