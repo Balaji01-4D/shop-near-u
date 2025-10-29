@@ -57,7 +57,7 @@ func (r *Repository) FindByID(id uint) (*models.Shop, error) {
 }
 
 func (r *Repository) UpdateShopStatus(shopID uint, status bool) error {
-	return r.DB.Model(&models.Shop{}).Where("id = ?", shopID).Update("status", status).Error
+	return r.DB.Model(&models.Shop{}).Where("id = ?", shopID).Update("is_open", status).Error
 }
 
 func (r *Repository) SubscribeShop(shopID uint, userID uint) (uint, error) {
