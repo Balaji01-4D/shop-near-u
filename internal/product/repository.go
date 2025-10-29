@@ -1,6 +1,7 @@
 package product
 
 import (
+	"fmt"
 	"shop-near-u/internal/models"
 
 	"gorm.io/gorm"
@@ -15,6 +16,17 @@ func NewRepository(db *gorm.DB) *Repository {
 }
 
 func (r *Repository) AddProduct(product *models.ShopProduct) error {
+	// First verify that both Shop and CatalogProduct exist
+	var shop models.Shop
+	if err := r.DB.First(&shop, product.ShopID).Error; err != nil {
+		return fmt.Errorf("shop with ID %d not found: %w", product.ShopID, err)
+	}
+
+	var catalogProduct models.CatalogProduct
+	if err := r.DB.First(&catalogProduct, product.CatalogID).Error; err != nil {
+		return fmt.Errorf("catalog product with ID %d not found: %w", product.CatalogID, err)
+	}
+
 	return r.DB.Create(product).Error
 }
 
@@ -31,6 +43,17 @@ func (r *Repository) GetProductByID(productID uint) (*models.ShopProduct, error)
 }
 
 func (r *Repository) UpdateProduct(product *models.ShopProduct) error {
+	// First verify that both Shop and CatalogProduct exist
+	var shop models.Shop
+	if err := r.DB.First(&shop, product.ShopID).Error; err != nil {
+		return fmt.Errorf("shop with ID %d not found: %w", product.ShopID, err)
+	}
+
+	var catalogProduct models.CatalogProduct
+	if err := r.DB.First(&catalogProduct, product.CatalogID).Error; err != nil {
+		return fmt.Errorf("catalog product with ID %d not found: %w", product.CatalogID, err)
+	}
+
 	return r.DB.Save(product).Error
 }
 

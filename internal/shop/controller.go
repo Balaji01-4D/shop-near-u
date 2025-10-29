@@ -377,7 +377,7 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB) {
 		products.POST("", ctrl.AddProduct)
 		products.GET("", ctrl.GetAllProducts)
 		products.GET("/:id", ctrl.GetProductByID)
-		products.PUT("/", ctrl.UpdateProduct)
+		products.PUT("", ctrl.UpdateProduct)
 		products.DELETE("/:id", ctrl.DeleteProduct)
 	}
 }
