@@ -103,6 +103,7 @@ func (ctrl *Controller) Login(c *gin.Context) {
 		Latitude:  shop.Latitude,
 		Longitude: shop.Longitude,
 		Token:     token,
+		IsOpen:    shop.IsOpen,
 	})
 
 }
@@ -121,16 +122,17 @@ func (ctrl *Controller) GetShopProfile(c *gin.Context) {
 	}
 
 	utils.SuccessResponse(c, http.StatusOK, "Shop profile retrieved successfully", ShopRegisterDTOResponse{
-		ID:        shop.ID,
-		Name:      shop.Name,
-		OwnerName: shop.OwnerName,
-		Type:      shop.Type,
-		Email:     shop.Email,
-		Mobile:    shop.Mobile,
-		Address:   shop.Address,
-		Latitude:  shop.Latitude,
-		Longitude: shop.Longitude,
+		ID:              shop.ID,
+		Name:            shop.Name,
+		OwnerName:       shop.OwnerName,
+		Type:            shop.Type,
+		Email:           shop.Email,
+		Mobile:          shop.Mobile,
+		Address:         shop.Address,
+		Latitude:        shop.Latitude,
+		Longitude:       shop.Longitude,
 		SubscriberCount: shop.SubscriberCount,
+		IsOpen:          shop.IsOpen,
 	})
 }
 
@@ -272,7 +274,7 @@ func (ctrl *Controller) IsShopOpen(c *gin.Context) {
 }
 
 func (ctrl *Controller) UpdateShopStatus(c *gin.Context) {
-		shopInterface, exists := c.Get("shop")
+	shopInterface, exists := c.Get("shop")
 	if !exists {
 		utils.ErrorResponseSimple(c, 401, "unauthorized")
 		return
@@ -293,13 +295,13 @@ func (ctrl *Controller) UpdateShopStatus(c *gin.Context) {
 
 	var isOpen bool
 	switch status {
-		case "open":
-			isOpen = true
-		case "closed":
-			isOpen = false
-		default:
-			utils.ErrorResponseSimple(c, 400, "invalid status")
-			return
+	case "open":
+		isOpen = true
+	case "closed":
+		isOpen = false
+	default:
+		utils.ErrorResponseSimple(c, 400, "invalid status")
+		return
 	}
 
 	err := ctrl.shopService.UpdateShopStatus(shop.ID, isOpen)
@@ -364,7 +366,6 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB) {
 		shops.GET("", ctrl.NearByShop)
 		shops.GET("/is_open/:id", ctrl.IsShopOpen)
 		shops.PUT("/status", middlewares.RequireShopOwnerAuth(db), ctrl.UpdateShopStatus)
-
 
 		shops.GET("/:id", middlewares.RequireUserAuth(db), ctrl.GetShopDetails)
 		shops.POST("/:id/subscribe", middlewares.RequireUserAuth(db), ctrl.SubscribeShop)

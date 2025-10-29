@@ -14,17 +14,18 @@ type ShopRegisterDTORequest struct {
 }
 
 type ShopRegisterDTOResponse struct {
-	ID        uint    `json:"id"`
-	Name      string  `json:"name"`
-	OwnerName string  `json:"owner_name"`
-	Type      string  `json:"type"`
-	Email     string  `json:"email"`
-	Mobile    string  `json:"mobile"`
-	Address   string  `json:"address"`
-	Latitude  float64 `json:"latitude"`
-	Longitude float64 `json:"longitude"`
-	SubscriberCount uint   `json:"subscriber_count"`
-	Token     string  `json:"token"`
+	ID              uint    `json:"id"`
+	Name            string  `json:"name"`
+	OwnerName       string  `json:"owner_name"`
+	Type            string  `json:"type"`
+	Email           string  `json:"email"`
+	Mobile          string  `json:"mobile"`
+	Address         string  `json:"address"`
+	Latitude        float64 `json:"latitude"`
+	Longitude       float64 `json:"longitude"`
+	SubscriberCount uint    `json:"subscriber_count"`
+	IsOpen          bool    `json:"is_open"`
+	Token           string  `json:"token"`
 }
 
 type ShopLoginDTORequest struct {
