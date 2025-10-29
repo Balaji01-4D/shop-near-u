@@ -32,13 +32,13 @@ func (r *Repository) AddProduct(product *models.ShopProduct) error {
 
 func (r *Repository) GetProductsByShopID(shopID uint) ([]models.ShopProduct, error) {
 	var products []models.ShopProduct
-	result := r.DB.Preload("catalogProduct").Where("shop_id = ?", shopID).Find(&products)
+	result := r.DB.Preload("CatalogProduct").Where("shop_id = ?", shopID).Find(&products)
 	return products, result.Error
 }
 
 func (r *Repository) GetProductByID(productID uint) (*models.ShopProduct, error) {
 	var product models.ShopProduct
-	result := r.DB.Preload("catalogProduct").First(&product, productID)
+	result := r.DB.Preload("CatalogProduct").First(&product, productID)
 	return &product, result.Error
 }
 
