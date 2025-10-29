@@ -34,6 +34,7 @@ func Migrate() {
 	err = db.AutoMigrate(&models.Shop{})
 	err = db.AutoMigrate(&models.CatalogProduct{})
 	err = db.AutoMigrate(&models.ShopProduct{})
+	err = db.AutoMigrate(&models.ShopSubscription{})
 
 	if err != nil {
 		panic("failed to migrate database")

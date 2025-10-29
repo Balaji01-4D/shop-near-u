@@ -23,6 +23,7 @@ type ShopRegisterDTOResponse struct {
 	Address   string  `json:"address"`
 	Latitude  float64 `json:"latitude"`
 	Longitude float64 `json:"longitude"`
+	SubscriberCount uint   `json:"subscriber_count"`
 	Token     string  `json:"token"`
 }
 
@@ -42,4 +43,21 @@ type NearByShopsDTORespone struct {
 	Latitude  float64 `json:"latitude" binding:"required"`
 	Longitude float64 `json:"longitude" binding:"required"`
 	Distance  float64 `json:"distance" binding:"required"`
+}
+
+type SubscribeShopDTOResponse struct {
+	Message         string `json:"message"`
+	SubscriberCount uint   `json:"subscriber_count"`
+}
+
+type UnsubscribeShopDTOResponse struct {
+	Message         string `json:"message"`
+	SubscriberCount uint   `json:"subscriber_count"`
+}
+
+type GetShopDetailsDTOResponse struct {
+	ID              uint   `json:"id"`
+	Name            string `json:"name"`
+	SubscriberCount uint   `json:"subscriber_count"`
+	IsSubscribed    bool   `json:"is_subscribed"`
 }

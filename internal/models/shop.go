@@ -21,9 +21,18 @@ type Shop struct {
 	Latitude  float64 `gorm:"type:decimal(10,8);" json:"latitude"`
 	Longitude float64 `gorm:"type:decimal(10,8);" json:"longitude"`
 	Location  gogis.Point `gorm:"type:geometry(POINT,4326);" json:"location"`
+	SubscriberCount uint `gorm:"type:int;default:0" json:"subscriber_count"`
 
 
 	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"`
 
 	ShopProducts []ShopProduct `gorm:"foreignKey:ShopID" json:"shop_products"`
+}
+
+
+type ShopSubscription struct {
+	ID 	  uint      `gorm:"primaryKey;autoIncrement" json:"id"`
+	ShopID uint      `gorm:"not null;index" json:"shop_id"`
+	UserID uint      `gorm:"not null;index" json:"user_id"`
+	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"`
 }

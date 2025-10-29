@@ -130,6 +130,7 @@ func (ctrl *Controller) GetShopProfile(c *gin.Context) {
 		Address:   shop.Address,
 		Latitude:  shop.Latitude,
 		Longitude: shop.Longitude,
+		SubscriberCount: shop.SubscriberCount,
 	})
 }
 
@@ -297,13 +298,26 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB) {
 	productService := product.NewService(product.NewRepository(db))
 	ctrl := NewController(shopService, productService)
 
-	shops := r.Group("/shop")
+	shops := r.Group("/shops")
 	{
 		shops.POST("/register", ctrl.RegisterShop)
 		shops.POST("/login", ctrl.Login)
 		shops.GET("/profile", middlewares.RequireShopOwnerAuth(db), ctrl.GetShopProfile)
 		shops.GET("", ctrl.NearByShop)
 
+
+		shops.GET("/:id", middlewares.RequireUserAuth(db), ctrl.GetShopDetails)
+		shops.POST("/:id/subscribe", middlewares.RequireUserAuth(db), ctrl.SubscribeShop)
+		shops.POST("/:id/unsubscribe", middlewares.RequireUserAuth(db), ctrl.UnsubscribeShop)
+	}
+
+	// Keep the old /shop route for backward compatibility
+	shop := r.Group("/shop")
+	{
+		shop.POST("/register", ctrl.RegisterShop)
+		shop.POST("/login", ctrl.Login)
+		shop.GET("/profile", middlewares.RequireShopOwnerAuth(db), ctrl.GetShopProfile)
+		shop.GET("", ctrl.NearByShop)
 	}
 
 	products := r.Group("/shop/products")

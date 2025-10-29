@@ -69,3 +69,27 @@ func (s *Service) GetNearbyShops(lat float64, lon float64, radius float64, limit
 
 	return shops, nil
 }
+
+func (s *Service) SubscribeShop(userID uint, shopID uint) (uint, error) {
+	subscriberCount, err := s.repository.SubscribeShop(shopID, userID)
+	if err != nil {
+		return 0, err
+	}
+	return subscriberCount, nil
+}
+
+func (s *Service) UnsubscribeShop(userID uint, shopID uint) (uint, error) {
+	subscriberCount, err := s.repository.UnsubscribeShop(shopID, userID)
+	if err != nil {
+		return 0, err
+	}
+	return subscriberCount, nil
+}
+
+func (s *Service) GetShopDetails(shopID uint, userID uint) (*models.Shop, bool, error) {
+	shop, isSubscribed, err := s.repository.GetShopDetails(shopID, userID)
+	if err != nil {
+		return nil, false, err
+	}
+	return shop, isSubscribed, nil
+}
