@@ -83,6 +83,10 @@ func (s *Service) SubscribeShop(userID uint, shopID uint) (uint, error) {
 	return subscriberCount, nil
 }
 
+func (s *Service) UpdateShopStatus(shopID uint, status bool) error {
+	return s.repository.UpdateShopStatus(shopID, status)
+}
+
 func (s *Service) UnsubscribeShop(userID uint, shopID uint) (uint, error) {
 	subscriberCount, err := s.repository.UnsubscribeShop(shopID, userID)
 	if err != nil {

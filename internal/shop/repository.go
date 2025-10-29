@@ -56,6 +56,10 @@ func (r *Repository) FindByID(id uint) (*models.Shop, error) {
 	return &shop, result.Error
 }
 
+func (r *Repository) UpdateShopStatus(shopID uint, status bool) error {
+	return r.DB.Model(&models.Shop{}).Where("id = ?", shopID).Update("status", status).Error
+}
+
 func (r *Repository) SubscribeShop(shopID uint, userID uint) (uint, error) {
 	// Use a transaction to ensure data consistency
 	tx := r.DB.Begin()

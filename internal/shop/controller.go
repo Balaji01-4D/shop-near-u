@@ -271,6 +271,46 @@ func (ctrl *Controller) IsShopOpen(c *gin.Context) {
 	utils.SuccessResponse(c, http.StatusOK, "Shop status retrieved successfully", shop.IsOpen)
 }
 
+func (ctrl *Controller) UpdateShopStatus(c *gin.Context) {
+		shopInterface, exists := c.Get("shop")
+	if !exists {
+		utils.ErrorResponseSimple(c, 401, "unauthorized")
+		return
+	}
+
+	shop, ok := shopInterface.(models.Shop)
+	if !ok {
+		utils.ErrorResponseSimple(c, 500, "failed to parse shop data")
+		return
+	}
+
+	status := c.Query("status")
+	// status can be "open" or "closed"
+	if status == "" {
+		utils.ErrorResponseSimple(c, 400, "status is required")
+		return
+	}
+
+	var isOpen bool
+	switch status {
+		case "open":
+			isOpen = true
+		case "closed":
+			isOpen = false
+		default:
+			utils.ErrorResponseSimple(c, 400, "invalid status")
+			return
+	}
+
+	err := ctrl.shopService.UpdateShopStatus(shop.ID, isOpen)
+	if err != nil {
+		utils.ErrorResponseSimple(c, 500, err.Error())
+		return
+	}
+
+	utils.SuccessResponse(c, http.StatusOK, "Shop status updated successfully", nil)
+}
+
 func (ctrl *Controller) NearByShop(c *gin.Context) {
 	latStr := c.Query("lat")
 	lonStr := c.Query("lon")
@@ -323,6 +363,7 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB) {
 		shops.GET("/profile", middlewares.RequireShopOwnerAuth(db), ctrl.GetShopProfile)
 		shops.GET("", ctrl.NearByShop)
 		shops.GET("/is_open/:id", ctrl.IsShopOpen)
+		shops.PUT("/status", middlewares.RequireShopOwnerAuth(db), ctrl.UpdateShopStatus)
 
 
 		shops.GET("/:id", middlewares.RequireUserAuth(db), ctrl.GetShopDetails)
