@@ -371,15 +371,6 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB) {
 		shops.POST("/:id/unsubscribe", middlewares.RequireUserAuth(db), ctrl.UnsubscribeShop)
 	}
 
-	// Keep the old /shop route for backward compatibility
-	shop := r.Group("/shop")
-	{
-		shop.POST("/register", ctrl.RegisterShop)
-		shop.POST("/login", ctrl.Login)
-		shop.GET("/profile", middlewares.RequireShopOwnerAuth(db), ctrl.GetShopProfile)
-		shop.GET("", ctrl.NearByShop)
-	}
-
 	products := r.Group("/shop/products")
 	products.Use(middlewares.RequireShopOwnerAuth(db))
 	{
