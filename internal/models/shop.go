@@ -20,9 +20,9 @@ type Shop struct {
 	Address   string  `gorm:"type:varchar(255);not null" json:"address"`
 	Latitude  float64 `gorm:"type:decimal(10,8);" json:"latitude"`
 	Longitude float64 `gorm:"type:decimal(10,8);" json:"longitude"`
-	Location  gogis.Point `gorm:"type:geometry(POINT,4326);" json:"location"`
-	SubscriberCount uint `gorm:"type:int;default:0" json:"subscriber_count"`
-
+	Location      gogis.Point `gorm:"type:geometry(POINT,4326);" json:"location"`
+	SubscriberCount uint        `gorm:"type:int;default:0" json:"subscriber_count"`
+	IsOpen        bool          `gorm:"type:boolean;default:true" json:"is_open"`
 
 	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"`
 

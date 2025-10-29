@@ -61,6 +61,11 @@ func (s *Service) AuthenticateShop(request *ShopLoginDTORequest) (*models.Shop, 
 	return shop, nil
 }
 
+func (s *Service) GetShopByID(shopID uint) (*models.Shop, error) {
+	return  s.repository.FindByID(shopID)
+
+}
+
 func (s *Service) GetNearbyShops(lat float64, lon float64, radius float64, limit int) ([]NearByShopsDTORespone, error) {
 	shops, err := s.repository.FindNearbyShops(lat, lon, radius, limit)
 	if err != nil {

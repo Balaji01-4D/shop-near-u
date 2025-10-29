@@ -253,6 +253,24 @@ func (ctrl *Controller) DeleteProduct(c *gin.Context) {
 	utils.SuccessResponse(c, http.StatusOK, "Product deleted successfully", nil)
 }
 
+func (ctrl *Controller) IsShopOpen(c *gin.Context) {
+	shopIDParam := c.Param("id")
+	shopId, err := utils.ParseUintParam(shopIDParam)
+
+	if err != nil {
+		utils.ErrorResponseSimple(c, 400, "invalid shop ID")
+		return
+	}
+
+	shop, err := ctrl.shopService.GetShopByID(shopId)
+	if err != nil {
+		utils.ErrorResponseSimple(c, 500, err.Error())
+		return
+	}
+
+	utils.SuccessResponse(c, http.StatusOK, "Shop status retrieved successfully", shop.IsOpen)
+}
+
 func (ctrl *Controller) NearByShop(c *gin.Context) {
 	latStr := c.Query("lat")
 	lonStr := c.Query("lon")
@@ -304,6 +322,7 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB) {
 		shops.POST("/login", ctrl.Login)
 		shops.GET("/profile", middlewares.RequireShopOwnerAuth(db), ctrl.GetShopProfile)
 		shops.GET("", ctrl.NearByShop)
+		shops.GET("/is_open/:id", ctrl.IsShopOpen)
 
 
 		shops.GET("/:id", middlewares.RequireUserAuth(db), ctrl.GetShopDetails)
