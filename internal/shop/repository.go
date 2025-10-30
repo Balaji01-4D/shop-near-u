@@ -195,3 +195,18 @@ func (r *Repository) GetShopDetails(shopID uint, userID uint) (*models.Shop, boo
 
 	return &shop, isSubscribed, nil
 }
+
+func (r *Repository) GetUserSubscribedShops(userID uint) ([]models.Shop, error) {
+	var shops []models.Shop
+
+	// Join ShopSubscription with Shop to get subscribed shops
+	err := r.DB.Joins("JOIN shop_subscriptions ON shops.id = shop_subscriptions.shop_id").
+		Where("shop_subscriptions.user_id = ?", userID).
+		Find(&shops).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return shops, nil
+}

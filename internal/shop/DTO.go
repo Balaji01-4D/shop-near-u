@@ -62,3 +62,15 @@ type GetShopDetailsDTOResponse struct {
 	SubscriberCount uint   `json:"subscriber_count"`
 	IsSubscribed    bool   `json:"is_subscribed"`
 }
+
+type SubscribedShopDTOResponse struct {
+	ID              uint    `json:"id"`
+	Name            string  `json:"name"`
+	OwnerName       string  `json:"owner_name"`
+	Type            string  `json:"type"`
+	Address         string  `json:"address"`
+	Latitude        float64 `json:"latitude"`
+	Longitude       float64 `json:"longitude"`
+	SubscriberCount uint    `json:"subscriber_count"`
+	IsOpen          bool    `json:"is_open"`
+}

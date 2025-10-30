@@ -62,7 +62,7 @@ func (s *Service) AuthenticateShop(request *ShopLoginDTORequest) (*models.Shop, 
 }
 
 func (s *Service) GetShopByID(shopID uint) (*models.Shop, error) {
-	return  s.repository.FindByID(shopID)
+	return s.repository.FindByID(shopID)
 
 }
 
@@ -101,4 +101,8 @@ func (s *Service) GetShopDetails(shopID uint, userID uint) (*models.Shop, bool, 
 		return nil, false, err
 	}
 	return shop, isSubscribed, nil
+}
+
+func (s *Service) GetUserSubscribedShops(userID uint) ([]models.Shop, error) {
+	return s.repository.GetUserSubscribedShops(userID)
 }

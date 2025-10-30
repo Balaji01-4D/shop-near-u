@@ -111,3 +111,38 @@ func (ctrl *Controller) GetShopDetails(c *gin.Context) {
 		IsSubscribed:    isSubscribed,
 	})
 }
+
+func (ctrl *Controller) GetUserSubscriptions(c *gin.Context) {
+	user, exists := c.Get("user")
+	if !exists {
+		utils.ErrorResponseSimple(c, http.StatusUnauthorized, "unauthorized")
+		c.Abort()
+		return
+	}
+
+	u := user.(models.User)
+
+	shops, err := ctrl.shopService.GetUserSubscribedShops(uint(u.ID))
+	if err != nil {
+		utils.ErrorResponseSimple(c, 500, err.Error())
+		return
+	}
+
+	// Convert to response DTOs
+	var response []SubscribedShopDTOResponse
+	for _, shop := range shops {
+		response = append(response, SubscribedShopDTOResponse{
+			ID:              shop.ID,
+			Name:            shop.Name,
+			OwnerName:       shop.OwnerName,
+			Type:            shop.Type,
+			Address:         shop.Address,
+			Latitude:        shop.Latitude,
+			Longitude:       shop.Longitude,
+			SubscriberCount: shop.SubscriberCount,
+			IsOpen:          shop.IsOpen,
+		})
+	}
+
+	utils.SuccessResponse(c, http.StatusOK, "User subscriptions retrieved successfully", response)
+}

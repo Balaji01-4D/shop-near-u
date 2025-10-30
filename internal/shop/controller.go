@@ -352,6 +352,44 @@ func (ctrl *Controller) NearByShop(c *gin.Context) {
 	utils.SuccessResponse(c, http.StatusOK, "Nearby shops retrieved successfully", shops)
 }
 
+func (ctrl *Controller) GetShopProducts(c *gin.Context) {
+	shopIDParam := c.Param("id")
+	if shopIDParam == "" {
+		utils.ErrorResponseSimple(c, 400, "shop ID is required")
+		return
+	}
+
+	shopID, err := utils.ParseUintParam(shopIDParam)
+	if err != nil {
+		utils.ErrorResponseSimple(c, 400, "invalid shop ID")
+		return
+	}
+
+	// Verify shop exists
+	shop, err := ctrl.shopService.GetShopByID(shopID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			utils.ErrorResponseSimple(c, 404, "shop not found")
+			return
+		}
+		utils.ErrorResponseSimple(c, 500, err.Error())
+		return
+	}
+
+	if shop == nil {
+		utils.ErrorResponseSimple(c, 404, "shop not found")
+		return
+	}
+
+	products, err := ctrl.productService.GetProductsByShopID(shopID)
+	if err != nil {
+		utils.ErrorResponseSimple(c, 500, err.Error())
+		return
+	}
+
+	utils.SuccessResponse(c, http.StatusOK, "Shop products retrieved successfully", products)
+}
+
 func RegisterRoutes(r *gin.Engine, db *gorm.DB) {
 	repo := NewRepository(db)
 	shopService := NewService(repo)
@@ -368,9 +406,13 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB) {
 		shops.PUT("/status", middlewares.RequireShopOwnerAuth(db), ctrl.UpdateShopStatus)
 
 		shops.GET("/:id", middlewares.RequireUserAuth(db), ctrl.GetShopDetails)
+		shops.GET("/:id/products", ctrl.GetShopProducts)
 		shops.POST("/:id/subscribe", middlewares.RequireUserAuth(db), ctrl.SubscribeShop)
 		shops.POST("/:id/unsubscribe", middlewares.RequireUserAuth(db), ctrl.UnsubscribeShop)
 	}
+
+	// User subscriptions endpoint
+	r.GET("/user/subscriptions", middlewares.RequireUserAuth(db), ctrl.GetUserSubscriptions)
 
 	products := r.Group("/shop/products")
 	products.Use(middlewares.RequireShopOwnerAuth(db))
